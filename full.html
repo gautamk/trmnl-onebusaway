@@ -1,0 +1,55 @@
+<div class="layout layout--col gap--space-between">
+  <div class="grid grid--cols-1">
+    <div class="item">
+      <div class="meta"></div>
+      <div class="content">
+        {% assign trmnlTime = trmnl.system.timestamp_utc %}
+        {% assign trmnlUTCOffset = trmnl.user.utc_offset | abs %}
+        <span class="title title">{{ data.references.stops[0].name }} #{{ data.references.stops[0].code }} </span>
+        <span class="value value--xxsmall value--tnums">
+          updated @ {{ currentTime | divided_by: 1000 | minus:trmnlUTCOffset | date:"%l:%M %p" }}
+        </span>
+        <table class="table">
+          <thead>
+            <tr>
+              <th><span class="title">Bus #</span></th>
+              <th><span class="title">ETA</span></th>
+              <th><span class="title">Arrival Time</span></th>
+              <th><span class="title"># Stops away</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            {% for arrival in data.entry.arrivalsAndDepartures %}
+              
+            <tr>
+              <td><span class="label">{{ arrival.routeShortName }}</span></td>
+              {% if arrival.predictedArrivalTime == 0 %}
+              <td><span class="label">
+                  {{ arrival.scheduledArrivalTime | minus: currentTime | divided_by: 1000  | divided_by: 60 }} mins
+                </span></td>
+                <td><span class="label">
+                  {{ arrival.scheduledArrivalTime | divided_by: 1000 |  minus: trmnlUTCOffset  | date: "%l:%M %p" }}
+                </span></td>
+              {% else %}
+                <td><span class="label">
+                  {{ arrival.predictedArrivalTime | default:arrival.scheduledArrivalTime | minus: currentTime | divided_by: 1000  | divided_by: 60 }} mins
+                </span></td>
+                <td><span class="label">
+                  {{ arrival.predictedArrivalTime | default:arrival.scheduledArrivalTime | divided_by: 1000 |  minus: trmnlUTCOffset  | date: "%l:%M %p" }}
+                </span></td>
+              {% endif %}
+              <td><span class="label"> {{ arrival.numberOfStopsAway }}</span></td>
+            </tr>
+            {% endfor %} 
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="title_bar">
+  <span class="title">Onebusaway | {{trmnlUTCOffset}}</span>
+  <span class="instance">https://onebusaway.org/</span>
+</div>
