@@ -1,0 +1,40 @@
+<div class="layout layout--row gap--space-between">
+  <div class="grid grid--cols-1">
+    <div class="item">
+      <div class="content">
+        {% assign trmnlTime = trmnl.system.timestamp_utc %}
+        {% assign trmnlUTCOffset = trmnl.user.utc_offset %}
+        <span class="title title--small">{{ data.references.stops[0].name }} #{{ data.references.stops[0].code }} </span>
+        <span class="value value--xxsmall value--tnums">
+          updated @ {{ currentTime | divided_by: 1000 | plus:trmnlUTCOffset | date:"%l:%M %p" }}
+        </span>
+        <table class="table">
+          <thead>
+            <tr>
+              <th><span class="label label--small" data-value-fit="true">Bus#</span></th>
+              <th><span class="label " data-value-fit="true">ETA</span></th>
+              <th><span class="label " data-value-fit="true">Arrival</span></th>
+              <th><span class="label label--small" data-value-fit="true">#StopsAway</span></th>
+            </tr>
+          </thead>
+          <tbody>
+
+            {% for arrival in data.entry.arrivalsAndDepartures %}
+            <tr>
+              <td><span class="value value--small " data-value-format="true" data-value-fit="true">{{ arrival.routeShortName }}</span></td>
+              <td><span class="value value--small " data-value-fit="true">{{ arrival.predictedArrivalTime | default:arrival.scheduledArrivalTime | minus: currentTime | divided_by: 1000  | divided_by: 60 }} mins</span></td>
+              <td><span class="value value--small " data-value-fit="true">{{ arrival.predictedArrivalTime | default:arrival.scheduledArrivalTime | divided_by: 1000 |  plus: trmnlUTCOffset  | date: "%r" }}</span></td>
+              <td><span class="value value--small " data-value-format="true" data-value-fit="true">{{ arrival.numberOfStopsAway }}</span></td>
+            </tr>
+            {% endfor %} 
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="title_bar">
+  <span class="title">Onebusaway</span>
+  <span class="instance">https://onebusaway.org/</span>
+</div>
