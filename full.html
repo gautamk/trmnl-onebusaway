@@ -1,46 +1,61 @@
-<div class="layout layout--col gap--space-between">
-  <div class="item">
-    {% assign trmnlTime = trmnl.system.timestamp_utc %}
-    {% assign trmnlUTCOffset = trmnl.user.utc_offset | abs %}
-    <div class="content">
-      <div class="title title">
-        {{ data.references.stops[0].name }} #{{ data.references.stops[0].code }}
-      </div>
-      <div class="value value--xxsmall value--tnums">
-        updated @ {{ currentTime | divided_by: 1000 | minus:trmnlUTCOffset | date:"%l:%M %p" }}
-      </div>
+{% assign trmnlTime = trmnl.system.timestamp_utc %}
+{% assign trmnlUTCOffset = trmnl.user.utc_offset | abs %}
 
-      <table class="table">
-        <thead>
-          <tr>
-            <th><span class="title">Bus #</span></th>
-            <th><span class="title">Arrival Time</span></th>
-            <th><span class="title"># Stops away</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for arrival in data.entry.arrivalsAndDepartures %}
-          <tr>
-            <td><span class="label">{{ arrival.routeShortName }}</span></td>
-            {% if arrival.predictedArrivalTime == 0 %}
-              <td><span class="label">
-                {{ arrival.scheduledArrivalTime | divided_by: 1000 | minus: trmnlUTCOffset | date: "%l:%M %p" }}
-              </span></td>
+<div class="layout layout--center-x layout--center-y">
+  <div class="stretch-y">
+    <table class="table table--bordered table--compact">
+      <thead>
+        <tr>
+          <th><span class="title">Bus #</span></th>
+          <th><span class="title">Arrival Time</span></th>
+          <th><span class="title"># Stops Away</span></th>
+          <th><span class="title">Status</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for arrival in data.entry.arrivalsAndDepartures %}
+        {% if arrival.predictedArrivalTime == 0 %}
+          {% assign arrival_time = arrival.scheduledArrivalTime %}
+        {% else %}
+          {% assign arrival_time = arrival.predictedArrivalTime | default:arrival.scheduledArrivalTime %}
+        {% endif %}
+        {% assign delay = arrival_time | minus: arrival.scheduledArrivalTime %}
+        {% assign delay_minutes = delay | divided_by: 60000 %}
+        <tr>
+          <td>
+            <span class="label">
+              <img class="image" src="https://img.icons8.com/ios-filled/25/bus.png"/>
+              {{ arrival.routeShortName }}
+            </span>
+          </td>
+          <td>
+            <span class="label">
+              {{ arrival_time | divided_by: 1000 | minus: trmnlUTCOffset | date: "%-I:%M %p" }}
+            </span>
+          </td>
+          <td>
+            <span class="label">{{ arrival.numberOfStopsAway }}</span>
+          </td>
+          <td>
+            {% if delay_minutes > 0 %}
+              <span class="label label--inverted">+{{ delay_minutes }}m</span>
+            {% elsif delay_minutes < 0 %}
+              <span class="label label--inverted">{{ delay_minutes }}m</span>
+            {% elsif arrival.predictedArrivalTime == 0 %}
+              <span class="label">Scheduled</span>
             {% else %}
-              <td><span class="label">
-                {{ arrival.predictedArrivalTime | default:arrival.scheduledArrivalTime | divided_by: 1000 | minus: trmnlUTCOffset | date: "%l:%M %p" }}
-              </span></td>
+              <span class="label">On time</span>
             {% endif %}
-            <td><span class="label">{{ arrival.numberOfStopsAway }}</span></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 
 <div class="title_bar">
-  <span class="title">Onebusaway | {{ trmnlUTCOffset }}</span>
-  <span class="instance">https://onebusaway.org/</span>
+  <img class="image" src="https://img.icons8.com/color/48/bus.png"/>
+  <span class="title">OneBusAway – {{ data.references.stops[0].name | truncate: 40 }}</span>
+  <span class="instance">updated @ {{ currentTime | divided_by:1000 | minus: trmnlUTCOffset | date: "%H:%M %p" }}</span>
 </div>
