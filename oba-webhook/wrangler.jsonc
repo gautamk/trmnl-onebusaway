@@ -4,25 +4,42 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"compatibility_date": "2025-04-01",
-	"main": "src/index.ts",
 	"name": "oba-webhook",
-	"upload_source_maps": true,
-	"d1_databases": [
+	"main": "src/index.ts",
+	"compatibility_date": "2024-10-22",
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1
+	},
+
+	"durable_objects": {
+		"bindings": [
+		  {
+			"name": "OBA_CACHE",
+			"class_name": "ObaCache"
+		  }
+		]
+	},
+	"migrations": [
 		{
-			"binding": "DB",
-			"database_id": "151f7d9b-365f-41d7-83ed-0bf4eeef5086",
-			"database_name": "d1-template-database"
+		  "tag": "v1",
+		  "new_sqlite_classes": [
+			"ObaCache"
+		  ]
 		}
 	],
-	"observability": {
-		"enabled": true
-	}
+	"secrets_store_secrets": [
+		{
+		  "binding": "OBA_API_KEY",
+		  "store_id": "15f14133c4e84204a487407cb1736298",
+		  "secret_name": "oba-apikey"
+		}
+	],
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
 	 */
-	// "placement": { "mode": "smart" },
+	"placement": { "mode": "smart" },
 
 	/**
 	 * Bindings
@@ -30,6 +47,7 @@
 	 * databases, object storage, AI inference, real-time communication and more.
 	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
 	 */
+	 
 
 	/**
 	 * Environment Variables

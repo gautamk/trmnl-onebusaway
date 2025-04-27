@@ -1,0 +1,51 @@
+{% assign trmnlTime = trmnl.system.timestamp_utc %}
+{% assign trmnlUTCOffset = trmnl.user.utc_offset | abs %}
+
+<div class="layout layout--center-x layout--center-y">
+  <div class="stretch-y">
+    <table class="table table--bordered table--compact">
+      <thead>
+        <tr>
+          <th><span class="title">Bus#</span></th>
+          <th><span class="title">ArrivalTime</span></th>
+          <th><span class="title">Stop</span></th>
+          <th><span class="title">#StopsAway</span></th>
+          <th><span class="title">Status</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for arrival in arrivalsAndDepartures %}
+        <tr>
+          <td>
+            <span class="label">
+              {{ arrival.routeShortName }}
+            </span>
+          </td>
+          <td>
+            <span class="label">
+              {{ arrival.arrivalTime }}
+            </span>
+          </td>
+          <td><span class="label">{{ arrival.stopName }}</span></td>
+          <td><span class="label">{{ arrival.numberOfStopsAway }}</span></td>
+          <td>
+            {% if arrival.delaySeconds > 0 %}
+            <span class="label label--inverted">+{{ arrival.delaySeconds | divided_by: 60 }}m</span>
+            {% elsif arrival.delaySeconds < 0 %}
+              <span class="label label--inverted">{{ arrival.delaySeconds | divided_by: 60 }}m</span>
+            {% else %}
+              <span class="label">On time</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="title_bar">
+  <img class="image" src="https://img.icons8.com/color/48/bus.png"/>    
+  <span class="title">{{ trmnl.plugin_settings.instance_name }}</span>
+  <span class="instance">updated @ {{ currentTime | date: "%I:%M %p" }}</span>
+</div>
