@@ -120,7 +120,7 @@ export default {
 		});
 		return Response.json({
 			arrivalsAndDepartures: arrivalsAndDepartures,
-			currentTime: new Date().toLocaleString("en-US", {timeZone: timeZone}),
+			currentTime: new Date().toLocaleTimeString("en-US", {timeZone: timeZone}),
 		});
 	},
 
