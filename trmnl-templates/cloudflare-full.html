@@ -23,7 +23,7 @@
           </td>
           <td>
             <span class="label">
-              {{ arrival.arrivalTime }}
+              {{ arrival.arrivalTime | date: "%I:%M %p" }}
             </span>
           </td>
           <td><span class="label">{{ arrival.stopName }}</span></td>

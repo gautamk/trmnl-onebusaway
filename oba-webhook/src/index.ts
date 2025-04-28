@@ -46,10 +46,11 @@ export default {
 		
 		
 		console.log(`Processing stopIds:  ${_stopIds}`);
-		
+		const minutesAfter =  parseInt(params.get('minutesAfter') || '30');
+		const minutesBefore = parseInt(params.get('minutesBefore') || '5');
 		// Wait for all the promises to resolve
 		const results = await Promise.allSettled(
-			new OBAInterface(apiKey).getArrivalsAndDeparturesForStops(_stopIds, 30, 15)
+			new OBAInterface(apiKey).getArrivalsAndDeparturesForStops(_stopIds, minutesAfter, minutesBefore)
 		);
 		
 		// Iterate over the results and process them
@@ -60,7 +61,7 @@ export default {
 					const arrivalTimeUnix = arrivalDeparture.predictedArrivalTime === 0 ?
 						arrivalDeparture.scheduledArrivalTime :
 						arrivalDeparture.predictedArrivalTime;
-					const delayUnix:number = arrivalDeparture.predictedArrivalTime - arrivalDeparture.scheduledArrivalTime;
+					const delayUnix:number = arrivalTimeUnix - arrivalDeparture.scheduledArrivalTime;
 					const delaySeconds:number = delayUnix / 1000;
 					arrivalsAndDepartures.push({
 						// the time of the last update
@@ -102,21 +103,19 @@ export default {
 						delaySeconds: delaySeconds,
 					});
 				});
-				arrivalsAndDepartures.sort((ad: ArrivalsAndDepartures, ad2: ArrivalsAndDepartures) => {
-					if ((ad.predictedArrivalTimeUnix || ad.scheduledArrivalTime) 
-						< (ad2.predictedArrivalTimeUnix || ad2.scheduledArrivalTime)) {
-						return -1;
-					} else if ((ad.predictedArrivalTimeUnix || ad.scheduledArrivalTime)
-						> (ad2.predictedArrivalTimeUnix || ad2.scheduledArrivalTime)) {
-						return 1;
-					} else {
-						return 0;
-					}
-				});
+				
 			} else {
 				// If the result is rejected, log the error
 				console.error(`Error index ${index} status ${result.status}: ${result.reason}`);
 			}
+		});
+		arrivalsAndDepartures.sort((ad: ArrivalsAndDepartures, ad2: ArrivalsAndDepartures) => {
+			if (ad.arrivalTimeUnix < ad2.arrivalTimeUnix) {
+				return -1;
+			} else if (ad.arrivalTimeUnix > ad2.arrivalTimeUnix) {
+				return 1;
+			}
+			return 0;
 		});
 		return Response.json({
 			arrivalsAndDepartures: arrivalsAndDepartures,
